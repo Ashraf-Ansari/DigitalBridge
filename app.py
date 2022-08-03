@@ -108,11 +108,7 @@ def showpictures():
     file_list = []
     for i in result:
         file_list.append(i[3])
-        print(i[0],i[3])
-    print()
-    print()
-    print()
-    print()
+        print(i[1],i[4])
     print()
     print()
     print()
