@@ -1,0 +1,11 @@
+<!doctype html>
+<title>Python Flask Upload Multiple Images and Display them</title>
+<h2>Select multiple images to upload and display</h2>
+
+{% if filenames %}
+	{% for filename in filenames %}
+		<div>
+			<img src="data:image/png;base64,'.base64_encode($filename).'">
+		</div>
+	{% endfor %}
+{% endif %}
