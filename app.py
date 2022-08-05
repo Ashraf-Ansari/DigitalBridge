@@ -1,9 +1,11 @@
 from flask import request, render_template, abort, Flask
-from HelperFunctions import get_db_connection, generate_file_name
+from HelperFunctions import get_db_connection, generate_file_name, delete_file, ExecuteQuery
 
 app = Flask(__name__)
 
-delete_queries = 'delete from badeges where name = ?'
+delete_queries = 'delete from badges where name =?'
+update_queries = 'update badges set students=? where id =?'
+select_queries_with_name = 'select * from badges where name =?'
 create_queries = 'INSERT INTO badges (name, description,badge,students) VALUES (?, ? ,?,?)'
 image_basepath = "static/images/"
 all_queries = 'select * from badges'
@@ -13,14 +15,23 @@ all_queries = 'select * from badges'
 def index():
     return render_template("file_upload_form.html")
 
-@app.route('/deleteBadge',methods = ['POST'])
+@app.route('/deleteBadge',methods = ['GET'])
 def deleteBadge():
-    if request.method == 'POST':
-        name = request.form['name']
-        con = get_db_connection()
-        con.execute(delete_queries,name)
-        con.commit()
-        con.close()
+    if request.method == 'GET':
+        args = request.args
+        args = args.to_dict();
+        print(args)
+        name = args.get("name")
+        result = ExecuteQuery(select_queries_with_name,(name,),True)
+        if len(result) != 0:
+            data = result[-1]
+            print(list(data))
+            fileName = data[3]
+            ExecuteQuery(delete_queries,(name,),True)
+            fileName = image_basepath+fileName
+            delete_file(fileName)
+            return "deleted succussfully"
+        return "Badge not found"
 
 @app.route('/createBadge', methods=['POST'])
 def create():
@@ -32,6 +43,9 @@ def create():
         students = request.form['students']
         fileName = file.filename
         print("file.filename ",fileName)
+        result = ExecuteQuery(select_queries_with_name,(name,),True)
+        if len(result)!=0:
+            abort(403, description="Badge with this name already exists")
         if fileName=="" or fileName==None:
             print("empty")
         else:
@@ -40,18 +54,14 @@ def create():
             file_path = image_basepath+fileName
             file.save(file_path)
             # file_data = convertToBinaryData(file_path)
-            con = get_db_connection()
-            con.execute(create_queries,(name,description,fileName,students))
-            con.commit()
-            con.close()
+            ExecuteQuery(create_queries,(name,description,fileName,students),True)
         return render_template("success.html")
 
 @app.route('/getBadges', methods=['GET'])
 def getBadges():
     print("inside getBadges method")
     if request.method == 'GET':
-        con = get_db_connection()
-        result = con.execute(all_queries).fetchall()
+        result = ExecuteQuery(all_queries,("",),False)
         print(len(result))
         allData = [list(i) for i in result]
         return allData
@@ -63,21 +73,40 @@ def search():
     print(args)
     name = args.get("name")
     email = args.get("email")
-    con = get_db_connection()
-    result = con.execute(all_queries).fetchall()
-    print("length", len(result))
+    result = ExecuteQuery(all_queries,("",),False)
     finalResult = []
     for i in result:
         if name==i[1]:
             emails = str(i[4]).split(",")
             for j in emails:
                 if j==email:
-                    finalResult.append(i)
+                    finalResult.append(list(i))
     print(finalResult)
     if len(finalResult)==0:
         abort(403, description="for this user badge not found")
 
-    return render_template("success.html")
+    return finalResult
+
+@app.route('/addEmail', methods=['GET'])
+def addEmail():
+    args = request.args
+    args = args.to_dict();
+    print(args)
+    name = args.get("name")
+    email = args.get("email")
+    # con = get_db_connection()
+    # result = con.execute(select_queries_with_name,(name,)).fetchall()
+    # con.close()
+    result = ExecuteQuery(select_queries_with_name,(name,),True)
+    print("length",len(result))
+    if(len(result)!=0):
+        data = result[-1]
+        print(list(data))
+        new_email = data[4]+","+email
+        print("new_email",new_email)
+        ExecuteQuery(update_queries,(new_email,data[0]),True)
+        return "updated"
+    return "user not found"
 
 
 if __name__ == '__main__':
