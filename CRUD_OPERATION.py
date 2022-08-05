@@ -50,6 +50,7 @@ def getBadges():
     if request.method == 'GET':
         con = get_db_connection()
         result = con.execute(all_queries).fetchall()
+        print(len(result))
         for i in result:
             print(i)
 
