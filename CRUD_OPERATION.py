@@ -1,13 +1,15 @@
-from flask import request, render_template, abort
+from flask import request, render_template, abort, Flask
 from HelperFunctions import get_db_connection, generate_file_name
-from app import app
+
+app = Flask(__name__)
 
 delete_queries = 'delete from badeges where name = ?'
 create_queries = 'INSERT INTO badges (name, description,badge,students) VALUES (?, ? ,?,?)'
 image_basepath = "static/images/"
 all_queries = 'select * from badges'
 
-@app.route('/')
+
+@app.route('/',methods = ['GET'])
 def index():
     return render_template("file_upload_form.html")
 
@@ -76,3 +78,7 @@ def search():
         abort(403, description="for this user badge not found")
 
     return render_template("success.html")
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
