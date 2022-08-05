@@ -32,5 +32,5 @@ def writeTofile(data, filename):
 def generate_file_name(name):
     gmt = time.gmtime()
     ts = calendar.timegm(gmt)
-    name = ts+"-"+name
+    name = str(ts)+"-"+name
     return name
