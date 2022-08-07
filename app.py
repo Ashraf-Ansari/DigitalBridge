@@ -3,9 +3,10 @@ from HelperFunctions import get_db_connection, generate_file_name, delete_file, 
 
 app = Flask(__name__)
 
-delete_queries = 'delete from badges where name =?'
+delete_queries = 'delete from badges where id =?'
 update_queries = 'update badges set students=? where id =?'
 select_queries_with_name = 'select * from badges where name =?'
+select_queries_with_id = 'select * from badges where id =?'
 create_queries = 'INSERT INTO badges (name, description,badge,students) VALUES (?, ? ,?,?)'
 image_basepath = "static/images/"
 all_queries = 'select * from badges'
@@ -22,16 +23,26 @@ def deleteBadge():
         args = request.args
         args = args.to_dict();
         print(args)
-        name = args.get("name")
-        result = ExecuteQuery(select_queries_with_name,(name,),True)
+        id = args.get("id")
+        result = ExecuteQuery(select_queries_with_id,(id,),True)
         if len(result) != 0:
             data = result[-1]
             print(list(data))
             fileName = data[3]
-            ExecuteQuery(delete_queries,(name,),True)
+            ExecuteQuery(delete_queries,(id,),True)
             fileName = image_basepath+fileName
             delete_file(fileName)
-            return "deleted succussfully"
+            result = ExecuteQuery(all_queries, ("",), False)
+            allData = []
+            for i in result:
+                data = dict()
+                data["id"] = i[0]
+                data["name"] = i[1]
+                data["description"] = i[2]
+                data["badge"] = i[3]
+                data["students"] = list(i[4].split(","))
+                allData.append(data)
+            return render_template("allBadge.html", allbadges=allData)
         return "Badge not found"
 
 @app.route('/createBadge', methods=['POST'])
@@ -57,10 +68,16 @@ def create():
             # file_data = convertToBinaryData(file_path)
             ExecuteQuery(create_queries,(name,description,fileName,students),True)
             result = ExecuteQuery(all_queries,("",),False)
-            file_names = []
+            allData = []
             for i in result:
-                file_names.append(i[3])
-        return render_template("showpictures.html",filenames=file_names)
+                data = dict()
+                data["id"] = i[0]
+                data["name"] = i[1]
+                data["description"] = i[2]
+                data["badge"] = i[3]
+                data["students"] = list(i[4].split(","))
+                allData.append(data)
+            return render_template("allBadge.html", allbadges=allData)
 
 @app.route('/display/<filename>')
 def display_image(filename):
@@ -101,7 +118,16 @@ def search():
             for j in emails:
                 if j==email:
                     finalResult.append(list(i))
-    print(finalResult)
+    allData = []
+    for i in finalResult:
+        data = dict()
+        data["id"] = i[0]
+        data["name"] = i[1]
+        data["description"] = i[2]
+        data["badge"] = i[3]
+        data["students"] = list(i[4].split(","))
+        allData.append(data)
+    return render_template("allBadge.html", allbadges=allData)
     if len(finalResult)==0:
         abort(403, description="for this user badge not found")
 
@@ -112,13 +138,15 @@ def addEmail():
     print("inside add email")
     args = request.args
     args = args.to_dict();
-    print(args)
-    name = args.get("name")
-    email = args.get("email")
+    print(args,request.form["name"],request.form["email"])
+    name = request.form["name"]
+    email = request.form["email"]
+    id = request.form["id"]
+    print("id",id)
     # con = get_db_connection()
     # result = con.execute(select_queries_with_name,(name,)).fetchall()
     # con.close()
-    result = ExecuteQuery(select_queries_with_name,(name,),True)
+    result = ExecuteQuery(select_queries_with_id,(id,),True)
     print("length",len(result))
     if(len(result)!=0):
         data = result[-1]
@@ -126,7 +154,17 @@ def addEmail():
         new_email = data[4]+","+email
         print("new_email",new_email)
         ExecuteQuery(update_queries,(new_email,data[0]),True)
-        return "updated"
+        result = ExecuteQuery(all_queries, ("",), False)
+        allData = []
+        for i in result:
+            data = dict()
+            data["id"] = i[0]
+            data["name"] = i[1]
+            data["description"] = i[2]
+            data["badge"] = i[3]
+            data["students"] = list(i[4].split(","))
+            allData.append(data)
+        return render_template("allBadge.html", allbadges=allData)
     return "Badge not found"
 
 
