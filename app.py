@@ -43,7 +43,17 @@ def deleteBadge():
                 data["students"] = list(i[4].split(","))
                 allData.append(data)
             return render_template("allBadge.html", allbadges=allData)
-        return "Badge not found"
+        result = ExecuteQuery(all_queries, ("",), False)
+        allData = []
+        for i in result:
+            data = dict()
+            data["id"] = i[0]
+            data["name"] = i[1]
+            data["description"] = i[2]
+            data["badge"] = i[3]
+            data["students"] = list(i[4].split(","))
+            allData.append(data)
+        return render_template("allBadge.html", allbadges=allData)
 
 @app.route('/createBadge', methods=['POST'])
 def create():
@@ -78,6 +88,18 @@ def create():
                 data["students"] = list(i[4].split(","))
                 allData.append(data)
             return render_template("allBadge.html", allbadges=allData)
+    result = ExecuteQuery(all_queries, ("",), False)
+    allData = []
+    for i in result:
+        data = dict()
+        data["id"] = i[0]
+        data["name"] = i[1]
+        data["description"] = i[2]
+        data["badge"] = i[3]
+        data["students"] = list(i[4].split(","))
+        allData.append(data)
+    return render_template("allBadge.html", allbadges=allData)
+
 
 @app.route('/display/<filename>')
 def display_image(filename):
@@ -127,7 +149,7 @@ def search():
         data["badge"] = i[3]
         data["students"] = list(i[4].split(","))
         allData.append(data)
-    return render_template("allBadge.html", allbadges=allData)
+    return render_template("oneImages.html", allbadges=allData)
     if len(finalResult)==0:
         abort(403, description="for this user badge not found")
 
@@ -165,9 +187,17 @@ def addEmail():
             data["students"] = list(i[4].split(","))
             allData.append(data)
         return render_template("allBadge.html", allbadges=allData)
-    return "Badge not found"
-
-
+    result = ExecuteQuery(all_queries, ("",), False)
+    allData = []
+    for i in result:
+        data = dict()
+        data["id"] = i[0]
+        data["name"] = i[1]
+        data["description"] = i[2]
+        data["badge"] = i[3]
+        data["students"] = list(i[4].split(","))
+        allData.append(data)
+    return render_template("allBadge.html", allbadges=allData)
 
 
 if __name__ == '__main__':
