@@ -33,22 +33,23 @@
     {% for item in allbadges %}
 
             <div style="padding:20px;float:left;">
-                <button type="submit" value ={{item.id}} onclick="deleteBadge(this.value)">Delete</button>
+
                 <form action = "/addEmail" method = "POST" enctype="multipart/form-data">
-                    <input type="text" name="email" placeholder="Add student Email"></input><br>
+                    <input type="text" name="email" placeholder="Add student Email"></input>
                     <input type="hidden" name="name" value={{item.name}}>
                     <input type="hidden" name="id" value={{item.id}}>
                 <input type = "submit" value="Add Email">
     </form>
                 <p>Badge Name : {{item.name}}</p>
                 <p>Badge Description : {{item.description}}</p>
-                <p>Eligible Students : {{item.students}}</p>
+                <p>Eligible Students :</p>
                 <select name="students" id="students-names">
                     {% for student in item.students %}
                     <option value="volvo">{{student}}</option>
                     {% endfor %}
                 </select>
             <img width="500" src="{{ url_for('display_image', filename=item.badge) }}">
+                <button type="submit" value ={{item.id}} onclick="deleteBadge(this.value)">Delete</button>
             </div>
     {% endfor %}
 {% endif %}
