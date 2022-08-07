@@ -42,18 +42,20 @@ def deleteBadge():
                 data["badge"] = i[3]
                 data["students"] = list(i[4].split(","))
                 allData.append(data)
+            print("allData before",allData)
             return render_template("allBadge.html", allbadges=allData)
-        result = ExecuteQuery(all_queries, ("",), False)
-        allData = []
-        for i in result:
-            data = dict()
-            data["id"] = i[0]
-            data["name"] = i[1]
-            data["description"] = i[2]
-            data["badge"] = i[3]
-            data["students"] = list(i[4].split(","))
-            allData.append(data)
-        return render_template("allBadge.html", allbadges=allData)
+        else:
+            result = ExecuteQuery(all_queries, ("",), False)
+            allData = []
+            for i in result:
+                data = dict()
+                data["id"] = i[0]
+                data["name"] = i[1]
+                data["description"] = i[2]
+                data["badge"] = i[3]
+                data["students"] = list(i[4].split(","))
+                allData.append(data)
+            return render_template("allBadge.html", allbadges=allData)
 
 @app.route('/createBadge', methods=['POST'])
 def create():
@@ -140,6 +142,8 @@ def search():
             for j in emails:
                 if j==email:
                     finalResult.append(list(i))
+    if len(finalResult)==0:
+        abort(403, description="for this user badge not found")
     allData = []
     for i in finalResult:
         data = dict()
@@ -150,8 +154,7 @@ def search():
         data["students"] = list(i[4].split(","))
         allData.append(data)
     return render_template("oneImages.html", allbadges=allData)
-    if len(finalResult)==0:
-        abort(403, description="for this user badge not found")
+
 
     return finalResult
 
