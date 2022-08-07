@@ -45,12 +45,13 @@
     </form>
                 <p>Badge Name : {{item.name}}</p>
                 <p>Badge Description : {{item.description}}</p>
-                <p>Eligible Students :</p>
+
+                <p>Eligible Students :
                 <select name="students" id="students-names">
                     {% for student in item.students %}
                     <option value="volvo">{{student}}</option>
                     {% endfor %}
-                </select>
+                </select></p>
             <img width="500" src="{{ url_for('display_image', filename=item.badge) }}">
                 <button type="submit" value ={{item.id}} onclick="deleteBadge(this.value)">Delete</button>
             </div>
