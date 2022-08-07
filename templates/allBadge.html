@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>Python Flask Upload multiple images and display multiple images uploaded</title>
+
+</head>
+<script type="text/javascript">
+    function deleteBadge(a) {
+    console.log(a)
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+             alert(this.responseText);
+         }
+    };
+    xhttp.open("GET", "http://127.0.0.1:5000/deleteBadge?name="+a, true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    }
+    function addEmail(a,b) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+             alert(this.responseText);
+         }
+    };
+    xhttp.open("GET", "http://127.0.0.1:5000/addEmail?name="+a+"email="+b, true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    }
+</script>
+<body>
+<div style="padding:20px;">
+{% if allbadges %}
+    {% for item in allbadges %}
+
+            <div style="padding:20px;float:left;">
+                <button type="submit" value ={{item.name}} onclick="deleteBadge(this.value)">Delete</button>
+                <form action = "/addEmail" method = "POST" enctype="multipart/form-data">
+                    <input type="text" name="email" placeholder="Add student Email"></input><br>
+                    <input type="hidden" name="name" value={{item.name}}>
+                <input type = "submit" value="Add Email">
+    </form>
+                <p>Badge Name : {{item.name}}</p>
+                <p>Badge Description : {{item.description}}</p>
+                <p>Eligible Students : {{item.students}}</p>
+                <select name="students" id="students-names">
+                    {% for student in item.students %}
+                    <option value="volvo">{{student}}</option>
+                    {% endfor %}
+                </select>
+            <img width="500" src="{{ url_for('display_image', filename=item.badge) }}">
+            </div>
+    {% endfor %}
+{% endif %}
+</div>
+</body>
+</html>

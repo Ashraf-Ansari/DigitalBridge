@@ -1,4 +1,4 @@
-from flask import request, render_template, abort, Flask
+from flask import request, render_template, abort, Flask, redirect, url_for
 from HelperFunctions import get_db_connection, generate_file_name, delete_file, ExecuteQuery
 
 app = Flask(__name__)
@@ -15,8 +15,9 @@ all_queries = 'select * from badges'
 def index():
     return render_template("file_upload_form.html")
 
-@app.route('/deleteBadge',methods = ['GET'])
+@app.route('/deleteBadge',methods = ['GET','POST'])
 def deleteBadge():
+    print("inside deleteBadge method")
     if request.method == 'GET':
         args = request.args
         args = args.to_dict();
@@ -55,7 +56,16 @@ def create():
             file.save(file_path)
             # file_data = convertToBinaryData(file_path)
             ExecuteQuery(create_queries,(name,description,fileName,students),True)
-        return render_template("success.html")
+            result = ExecuteQuery(all_queries,("",),False)
+            file_names = []
+            for i in result:
+                file_names.append(i[3])
+        return render_template("showpictures.html",filenames=file_names)
+
+@app.route('/display/<filename>')
+def display_image(filename):
+    #print('display_image filename: ' + filename)
+    return redirect(url_for('static', filename='images/' + filename), code=301)
 
 @app.route('/getBadges', methods=['GET'])
 def getBadges():
@@ -63,8 +73,18 @@ def getBadges():
     if request.method == 'GET':
         result = ExecuteQuery(all_queries,("",),False)
         print(len(result))
-        allData = [list(i) for i in result]
-        return allData
+        label = ["id","name","description","badge","students"]
+        allData = []
+        for i in result:
+            data = dict()
+            data["id"]=i[0]
+            data["name"] = i[1]
+            data["description"] = i[2]
+            data["badge"] = i[3]
+            data["students"] = list(i[4].split(","))
+            allData.append(data)
+        return render_template("allBadge.html",allbadges=allData)
+        # return allData
 
 @app.route('/badge/verify', methods=['GET'])
 def search():
@@ -87,8 +107,9 @@ def search():
 
     return finalResult
 
-@app.route('/addEmail', methods=['GET'])
+@app.route('/addEmail', methods=['GET','POST'])
 def addEmail():
+    print("inside add email")
     args = request.args
     args = args.to_dict();
     print(args)
@@ -106,7 +127,9 @@ def addEmail():
         print("new_email",new_email)
         ExecuteQuery(update_queries,(new_email,data[0]),True)
         return "updated"
-    return "user not found"
+    return "Badge not found"
+
+
 
 
 if __name__ == '__main__':

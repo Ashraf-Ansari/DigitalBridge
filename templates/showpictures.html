@@ -1,11 +1,16 @@
-<!doctype html>
-<title>Python Flask Upload Multiple Images and Display them</title>
-<h2>Select multiple images to upload and display</h2>
-
+<html>
+<head>
+<title>Python Flask Upload multiple images and display multiple images uploaded</title>
+</head>
+<body>
+<div style="padding:20px;">
 {% if filenames %}
-	{% for filename in filenames %}
-		<div>
-			<img src="data:image/png;base64,'.base64_encode($filename).'">
-		</div>
-	{% endfor %}
+    {% for filename in filenames %}
+        <div style="padding:20px;float:left;">
+            <img width="500" src="{{ url_for('display_image', filename=filename) }}">
+        </div>
+    {% endfor %}
 {% endif %}
+</div>
+</body>
+</html>
