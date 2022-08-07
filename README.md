@@ -1,4 +1,6 @@
-# DigitalBadge
+# DigitalBadge  
+
+Note: Project is focused on functionality. please ignore frontend page designs. Thanks
 
 project setup  
 1. download the project
